@@ -56,52 +56,56 @@ def _create_component_spec_from_airflow_op(
     output_names.extend(variables_output_names)
     output_names.extend(xcoms_output_names)
 
-    from collections import namedtuple
-    returnType = namedtuple('AirflowOpOutputs', output_names)
+    def _run_airflow_op_closure():
+        def _airflow(op_class, kwargs_str=''):
+            result_output_name='Result'
+            variables_dict_output_name='Variables'
+            xcoms_dict_output_name='XComs'
+            variables_to_output=None
+            xcoms_to_output=None
+            variables_output_names = variables_to_output or []
+            xcoms_output_names = xcoms_to_output or []
+            from airflow.utils import db
+            db.initdb()
+            import json
+            kwargs = json.loads(kwargs_str)
 
-    def _run_airflow_op_closure(*op_args, **op_kwargs) -> returnType:
-        (result, variables, xcoms) = _run_airflow_op(op_class, *op_args, **op_kwargs)
+            from datetime import datetime
+            from airflow import DAG, settings
+            from airflow.models import TaskInstance, Variable, XCom
+            from airflow.operators import BashOperator, TaskDependencySensor
 
-        output_values = {}
+            dag = DAG(dag_id='anydag', start_date=datetime.now())
+            Op = eval(op_class)
+            task = Op(dag=dag, task_id='anytask', **kwargs)
+            ti = TaskInstance(task=task, execution_date=datetime.now())
+            result = task.execute(ti.get_template_context())
 
-        import json
-        if result_output_name is not None:
-            output_values[result_output_name] = str(result)
-        if variables_dict_output_name is not None:
-            output_values[variables_dict_output_name] = json.dumps(variables)
-        if xcoms_dict_output_name is not None:
-            output_values[xcoms_dict_output_name] = json.dumps(xcoms)
-        for name in variables_output_names:
-            output_values[name] = variables[name]
-        for name in xcoms_output_names:
-            output_values[name] = xcoms[name]
+            variables = {var.id: var.val for var in settings.Session().query(Variable).all()}
+            xcoms = {msg.key: msg.value for msg in settings.Session().query(XCom).all()}
 
-        return returnType(**output_values)
+            output_values = {}
+
+            if result_output_name is not None:
+                output_values[result_output_name] = str(result)
+            if variables_dict_output_name is not None:
+                output_values[variables_dict_output_name] = json.dumps(variables)
+            if xcoms_dict_output_name is not None:
+                output_values[xcoms_dict_output_name] = json.dumps(xcoms)
+            for name in variables_output_names:
+                output_values[name] = variables[name]
+            for name in xcoms_output_names:
+                output_values[name] = xcoms[name]
+            print('Output values:', output_values)
+            return output_values
+        return _airflow
 
     # Hacking the function signature so that correct component interface is generated
     import inspect
     sig = inspect.Signature(
         parameters=inspect.signature(op_class).parameters.values(),
-        return_annotation=returnType,
+        #return_annotation=returnType,
     )
     _run_airflow_op_closure.__signature__ = sig
 
-    return _func_to_component_spec(_run_airflow_op_closure, base_image=base_image, modules_to_capture=modules_to_capture)
-
-
-def _run_airflow_op(Op, *op_args, **op_kwargs):
-    from airflow.utils import db
-    db.initdb()
-
-    from datetime import datetime
-    from airflow import DAG, settings
-    from airflow.models import TaskInstance, Variable, XCom
-
-    dag = DAG(dag_id='anydag', start_date=datetime.now())
-    task = Op(*op_args, **op_kwargs, dag=dag, task_id='anytask')
-    ti = TaskInstance(task=task, execution_date=datetime.now())
-    result = task.execute(ti.get_template_context())
-
-    variables = {var.id: var.val for var in settings.Session().query(Variable).all()}
-    xcoms = {msg.key: msg.value for msg in settings.Session().query(XCom).all()}
-    return (result, variables, xcoms)
+    return _func_to_component_spec(_run_airflow_op_closure(), base_image=base_image, modules_to_capture=modules_to_capture)
