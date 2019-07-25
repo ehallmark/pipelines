@@ -197,7 +197,7 @@ def _extract_component_interface(func) -> ComponentSpec:
     return component_spec
 
 
-def _func_to_component_spec(func, extra_code='', base_image=_default_base_image, modules_to_capture: List[str] = None, use_code_pickling=False) -> ComponentSpec:
+def _func_to_component_spec(func, extra_code='', base_image=_default_base_image, modules_to_capture: List[str] = None, use_code_pickling=False, component_name=None) -> ComponentSpec:
     '''Takes a self-contained python function and converts it to component
 
     Args:
@@ -219,6 +219,8 @@ def _func_to_component_spec(func, extra_code='', base_image=_default_base_image,
             raise ValueError('base_image cannot be None')
 
     component_spec = _extract_component_interface(func)
+    if component_name is not None:
+        component_spec.name = component_name
 
     arguments = []
     arguments.extend(InputValuePlaceholder(input.name) for input in component_spec.inputs)
@@ -279,6 +281,7 @@ def _func_to_component_spec(func, extra_code='', base_image=_default_base_image,
 
     full_source = \
 '''\
+_output_files = []
 {extra_code}
 
 {func_code}
@@ -290,11 +293,11 @@ _outputs = {func_name}(**_parsed_args)
 if not hasattr(_outputs, '__getitem__') or isinstance(_outputs, str):
     _outputs = [_outputs]
 
-#from pathlib import Path
-#for idx, filename in enumerate(_output_files):
-#    _output_path = Path(filename)
-#    _output_path.parent.mkdir(parents=True, exist_ok=True)
-#    _output_path.write_text(str(_outputs[idx]))
+from pathlib import Path
+for idx, filename in enumerate(_output_files):
+    _output_path = Path(filename)
+    _output_path.parent.mkdir(parents=True, exist_ok=True)
+    _output_path.write_text(str(_outputs[idx]))
 '''.format(
         func_name=func.__name__,
         func_code=func_code,
@@ -305,11 +308,10 @@ if not hasattr(_outputs, '__getitem__') or isinstance(_outputs, str):
     #Removing consecutive blank lines
     import re
     full_source = re.sub('\n\n\n+', '\n\n', full_source).strip('\n') + '\n'
-
     component_spec.implementation=ContainerImplementation(
         container=ContainerSpec(
             image=base_image,
-            command=['python', '-u', '-c', full_source],
+            command=['python3', '-u', '-c', full_source],
             args=arguments,
         )
     )
