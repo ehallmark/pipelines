@@ -46,7 +46,7 @@ def _create_component_spec_from_airflow_op(
     variables_to_output=None,
     xcoms_to_output=None,
     modules_to_capture: List[str] = None,
-    task_id=task_id
+    task_id=None
 ):
     variables_output_names = variables_to_output or []
     xcoms_output_names = xcoms_to_output or []
