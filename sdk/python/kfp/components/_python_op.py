@@ -296,7 +296,10 @@ if not hasattr(_outputs, '__getitem__') or isinstance(_outputs, str):
 from pathlib import Path
 for idx, filename in enumerate(_output_files):
     _output_path = Path(filename)
-    _output_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        _output_path.parent.mkdir(parents=True)
+    except:
+        pass
     _output_path.write_text(str(_outputs[idx]))
 '''.format(
         func_name=func.__name__,
