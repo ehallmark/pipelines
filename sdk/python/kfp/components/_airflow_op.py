@@ -27,7 +27,6 @@ from ._python_op import _func_to_component_spec, _create_task_factory_from_compo
 _default_airflow_base_image = 'apache/airflow@sha256:7f60cbef6bf92b1f3a5b4e46044911ced39736a8c3858284d3c5a961b3ba8735'
 
 def create_component_from_airflow_op(op_class, base_image=_default_airflow_base_image, result_output_name='Result', variable_output_names=None, xcom_output_names=None, modules_to_capture: List[str] = None, **kwargs):
-    base_image = kwargs.get('base_image', _default_airflow_base_image)
     if not isinstance(op_class, string_types):
         op_class = str(x).split("'")[1].split('.')[-1].strip() # Convert to string of class name
     op = _create_component_from_airflow_op(op_class, base_image=base_image, result_output_name=result_output_name, variable_output_names=variable_output_names, xcom_output_names=xcom_output_names, modules_to_capture=modules_to_capture)
