@@ -300,6 +300,8 @@ for idx, filename in enumerate(_output_files):
         _output_path.parent.mkdir(parents=True)
     except:
         pass
+    with open(str(_output_path), 'w') as f:
+        f.write(str(_outputs[idx]))
     #_output_path.write_text(str(_outputs[idx]))
 '''.format(
         func_name=func.__name__,
