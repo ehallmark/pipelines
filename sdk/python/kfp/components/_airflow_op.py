@@ -33,7 +33,7 @@ def create_component_from_airflow_op(op_class, base_image=_default_airflow_base_
     return op(op_class, json.dumps(kwargs))
 
 def _create_component_from_airflow_op(op_class, base_image=_default_airflow_base_image, task_id=None, result_output_name='Result', variable_output_names=None, xcom_output_names=None, modules_to_capture: List[str] = None):
-    component_spec = _create_component_spec_from_airflow_op(op_class, base_image, result_output_name, variable_output_names, xcom_output_names, modules_to_capture, task_id)
+    component_spec = _create_component_spec_from_airflow_op(op_class, base_image, result_output_name, variable_output_names, xcom_output_names, modules_to_capture=modules_to_capture, task_id=task_id)
     task_factory = _create_task_factory_from_component_spec(component_spec)
     return task_factory
 
@@ -46,6 +46,7 @@ def _create_component_spec_from_airflow_op(
     variables_to_output=None,
     xcoms_to_output=None,
     modules_to_capture: List[str] = None,
+    task_id=task_id
 ):
     variables_output_names = variables_to_output or []
     xcoms_output_names = xcoms_to_output or []
