@@ -64,7 +64,7 @@ def _create_component_spec_from_airflow_op(
     from collections import namedtuple
     returnType = namedtuple('AirflowOpOutputs', output_names)
 
-    def _run_airflow_op_closure(op_class, kwargs_str='') -> returnType:
+    def _run_airflow_op_closure(op_class, kwargs_str=''):
         result_output_name='Result'
         variables_dict_output_name='Variables'
         xcoms_dict_output_name='XComs'
@@ -140,10 +140,10 @@ def _create_component_spec_from_airflow_op(
 
     # Hacking the function signature so that correct component interface is generated
     #import inspect
-    #sig = inspect.Signature(
-    #    parameters=inspect.signature(op_class).parameters.values(),
-    #    return_annotation=returnType,
-    #)
-    #_run_airflow_op_closure.__signature__ = sig
+    sig = inspect.Signature(
+        parameters=['op_class', 'kwargs_str'],
+        return_annotation=returnType,
+    )
+    _run_airflow_op_closure.__signature__ = sig
 
     return _func_to_component_spec(_run_airflow_op_closure, base_image=base_image, modules_to_capture=modules_to_capture)
