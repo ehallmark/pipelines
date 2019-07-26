@@ -18,6 +18,7 @@ __all__ = [
 ]
 
 
+from typing import List
 import json
 from six import string_types
 from ._python_op import _func_to_component_spec, _create_task_factory_from_component_spec
@@ -25,13 +26,13 @@ from ._python_op import _func_to_component_spec, _create_task_factory_from_compo
 
 _default_airflow_base_image = 'apache/airflow@sha256:7f60cbef6bf92b1f3a5b4e46044911ced39736a8c3858284d3c5a961b3ba8735'
 
-def create_component_from_airflow_op(op_class, base_image=_default_airflow_base_image, result_output_name='Result', variable_output_names=None, xcom_output_names=None, modules_to_capture=None, **kwargs):
+def create_component_from_airflow_op(op_class, base_image=_default_airflow_base_image, result_output_name='Result', variable_output_names=None, xcom_output_names=None, modules_to_capture: List[str] = None, **kwargs):
     if not isinstance(op_class, string_types):
         op_class = str(op_class).split("'")[1].split('.')[-1].strip() # Convert to string of class name
     op = _create_component_from_airflow_op(op_class, base_image=base_image, result_output_name=result_output_name, variable_output_names=variable_output_names, xcom_output_names=xcom_output_names, modules_to_capture=modules_to_capture)
     return op(op_class, json.dumps(kwargs))
 
-def _create_component_from_airflow_op(op_class, base_image=_default_airflow_base_image, result_output_name='Result', variable_output_names=None, xcom_output_names=None, modules_to_capture=None):
+def _create_component_from_airflow_op(op_class, base_image=_default_airflow_base_image, result_output_name='Result', variable_output_names=None, xcom_output_names=None, modules_to_capture: List[str] = None):
     component_spec = _create_component_spec_from_airflow_op(op_class, base_image, result_output_name, variable_output_names, xcom_output_names, modules_to_capture)
     task_factory = _create_task_factory_from_component_spec(component_spec)
     return task_factory
@@ -44,7 +45,7 @@ def _create_component_spec_from_airflow_op(
     xcoms_dict_output_name='XComs',
     variables_to_output=None,
     xcoms_to_output=None,
-    modules_to_capture=None,
+    modules_to_capture: List[str] = None,
 ):
     variables_output_names = variables_to_output or []
     xcoms_output_names = xcoms_to_output or []
