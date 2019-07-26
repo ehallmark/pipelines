@@ -292,17 +292,15 @@ _outputs = {func_name}(**_parsed_args)
 
 if not hasattr(_outputs, '__getitem__') or isinstance(_outputs, str):
     _outputs = [_outputs]
-
+import os
 from pathlib import Path
 for idx, filename in enumerate(_output_files):
     _output_path = Path(filename)
-    try:
-        _output_path.parent.mkdir(parents=True)
-    except:
-        pass
+    _parent_path = _output_path.parent
+    if not os.path.exists(str(_parent_path)):
+        os.makedirs(str(_parent_path))
     with open(str(_output_path), 'w') as f:
         f.write(str(_outputs[idx]))
-    #_output_path.write_text(str(_outputs[idx]))
 '''.format(
         func_name=func.__name__,
         func_code=func_code,
