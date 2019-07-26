@@ -139,7 +139,7 @@ def _create_component_spec_from_airflow_op(
         return returnType(**output_values)
 
     # Hacking the function signature so that correct component interface is generated
-    #import inspect
+    import inspect
     sig = inspect.Signature(
         parameters=['op_class', 'kwargs_str'],
         return_annotation=returnType,
