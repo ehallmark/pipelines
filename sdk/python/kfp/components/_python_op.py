@@ -296,8 +296,6 @@ if not hasattr(_outputs, '__getitem__') or isinstance(_outputs, str):
 from pathlib import Path
 for idx, filename in enumerate(_output_files):
     _output_path = Path(filename)
-    if not os.path.exists(_output_path):
-        os.makedirs(_output_path)
     try:
         _output_path.parent.mkdir(parents=True)
     except:
