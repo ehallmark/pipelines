@@ -30,7 +30,7 @@ def create_component_from_airflow_op(op_class, base_image=_default_airflow_base_
     base_image = kwargs.get('base_image', _default_airflow_base_image)
     if not isinstance(op_class, string_types):
         op_class = str(x).split("'")[1].split('.')[-1].strip() # Convert to string of class name
-    op = _create_component_from_airflow_op(base_image=base_image, result_output_name=result_output_name, variable_output_names=variable_output_names, xcom_output_names=xcom_output_names, modules_to_capture=modules_to_capture)
+    op = _create_component_from_airflow_op(op_class, base_image=base_image, result_output_name=result_output_name, variable_output_names=variable_output_names, xcom_output_names=xcom_output_names, modules_to_capture=modules_to_capture)
     return op(operator_name, json.dumps(kwargs))
 
 def _create_component_from_airflow_op(op_class, base_image=_default_airflow_base_image, result_output_name='Result', variable_output_names=None, xcom_output_names=None, modules_to_capture: List[str] = None):
