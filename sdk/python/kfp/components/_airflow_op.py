@@ -37,43 +37,12 @@ def create_component_from_airflow_op(op_class, base_image=_default_airflow_base_
 
     return _build
 
-<<<<<<< HEAD
 def _create_component_from_airflow_op(op_class, *op_args, base_image=_default_airflow_base_image, task_id=None, result_output_name='Result', variables_dict_output_name='Variables', xcoms_dict_output_name='XComs', modules_to_capture: List[str] = None, use_code_pickling=True, **op_kwargs):
     component_spec = _create_component_spec_from_airflow_op(op_class, *op_args, base_image=base_image, result_output_name=result_output_name, variables_dict_output_name=variables_dict_output_name, xcoms_dict_output_name=xcoms_dict_output_name, modules_to_capture=modules_to_capture, task_id=task_id, use_code_pickling=use_code_pickling, **op_kwargs)
-=======
-def create_component_from_airflow_op(
-    op_class: type,
-    base_image: str = _default_airflow_base_image,
-    variable_output_names: List[str] = None,
-    xcom_output_names: List[str] = None,
-    modules_to_capture: List[str] = None
-):
-    '''
-    Creates component function from an Airflow operator class.
-    The inputs of the component are the same as the operator constructor parameters.
-    By default the component has the following outputs: "Result", "Variables" and "XComs". "Variables" and "XComs" are serialized JSON maps of all variables and xcoms produced by the operator during the execution.
-    Use the variable_output_names and xcom_output_names parameters to output individual variables/xcoms as separate outputs.
-
-    Args:
-        op_class: Reference to the Airflow operator class (e.g. EmailOperator or BashOperator) to convert to componenent.
-        base_image: Optional. The container image to use for the component. Default is apache/airflow. The container image must have the same python version as the environment used to run create_component_from_airflow_op. The image should have python 3.5+ with airflow package installed.
-        variable_output_names: Optional. A list of Airflow "variables" produced by the operator that should be returned as separate outputs.
-        xcom_output_names: Optional. A list of Airflow "XComs" produced by the operator that should be returned as separate outputs.
-        modules_to_capture: Optional. A list of names of additional modules that the operator depends on. By default only the module containing the operator class is captured. If the operator class uses the code from another module, the name of that module can be specified in this list.
-    '''
-    component_spec = _create_component_spec_from_airflow_op(
-        op_class=op_class,
-        base_image=base_image,
-        variables_to_output=variable_output_names,
-        xcoms_to_output=xcom_output_names,
-        modules_to_capture=modules_to_capture,
-    )
->>>>>>> f665e7366b02055a21db8cde879a80a2ddb50187
     task_factory = _create_task_factory_from_component_spec(component_spec)
     return task_factory
 
 def _create_component_spec_from_airflow_op(
-<<<<<<< HEAD
     op_class,
     *op_args,
     base_image=_default_airflow_base_image,
@@ -82,15 +51,6 @@ def _create_component_spec_from_airflow_op(
     xcoms_dict_output_name='XComs',
     variables_to_output=None,
     xcoms_to_output=None,
-=======
-    op_class: type,
-    base_image: str = _default_airflow_base_image,
-    result_output_name: str = 'Result',
-    variables_dict_output_name: str = 'Variables',
-    xcoms_dict_output_name: str = 'XComs',
-    variables_to_output: List[str] = None,
-    xcoms_to_output: List[str] = None,
->>>>>>> f665e7366b02055a21db8cde879a80a2ddb50187
     modules_to_capture: List[str] = None,
     task_id=None,
     use_code_pickling=True,
@@ -163,36 +123,10 @@ def _create_component_spec_from_airflow_op(
     #Filtering out `*args` and `**kwargs` parameters that some operators have
     parameters = [param for param in parameters if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD]
     sig = inspect.Signature(
-<<<<<<< HEAD
         parameters=inspect.signature(_run_airflow_op_closure).parameters.values(),
-=======
-        parameters=parameters,
->>>>>>> f665e7366b02055a21db8cde879a80a2ddb50187
         return_annotation=returnType,
     )
     _run_airflow_op_closure.__signature__ = sig
     _run_airflow_op_closure.__name__ = op_class.__name__
 
-<<<<<<< HEAD
     return _func_to_component_spec(_run_airflow_op_closure, base_image=base_image, modules_to_capture=modules_to_capture, use_code_pickling=use_code_pickling, component_name=task_id)
-=======
-    return _func_to_component_spec(_run_airflow_op_closure, base_image=base_image, use_code_pickling=True, modules_to_capture=modules_to_capture)
-
-
-def _run_airflow_op(Op, *op_args, **op_kwargs):
-    from airflow.utils import db
-    db.initdb()
-
-    from datetime import datetime
-    from airflow import DAG, settings
-    from airflow.models import TaskInstance, Variable, XCom
-
-    dag = DAG(dag_id='anydag', start_date=datetime.now())
-    task = Op(*op_args, **op_kwargs, dag=dag, task_id='anytask')
-    ti = TaskInstance(task=task, execution_date=datetime.now())
-    result = task.execute(ti.get_template_context())
-
-    variables = {var.id: var.val for var in settings.Session().query(Variable).all()}
-    xcoms = {msg.key: msg.value for msg in settings.Session().query(XCom).all()}
-    return (result, variables, xcoms)
->>>>>>> f665e7366b02055a21db8cde879a80a2ddb50187
