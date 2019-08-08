@@ -85,9 +85,13 @@ def _create_component_spec_from_airflow_op(
         import json
         op_args = json.loads(op_args)
         op_kwargs = json.loads(op_kwargs)
-        if 'time_delta' in op_kwargs:
+        if '_delta' in op_kwargs:
             from datetime import timedelta
-            op_kwargs['time_delta'] = timedelta(**op_kwargs['time_delta'])
+            op_kwargs['delta'] = timedelta(**op_kwargs['_delta'])
+            del op_kwargs['_delta']
+        if 'on_failure_callback' in op_kwargs:
+            print('Warning failure callback not yet working on kubeflow!')
+            
         from airflow.utils import db
         db.initdb()
 
