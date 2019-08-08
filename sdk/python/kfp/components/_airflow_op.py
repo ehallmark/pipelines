@@ -74,10 +74,14 @@ def _create_component_spec_from_airflow_op(
     returnType = namedtuple('AirflowOpOutputs', output_names)
 
     def _run_airflow_op_closure(op_args, op_kwargs):
+        import logging
+        # Allow logs to show in Pipelines UI
+        root = logging.getLogger()
+        root.setLevel(logging.DEBUG)
 
         logging.info('Args: %s' % args)
         logging.info('Kwargs: %s' % kwargs)
-        
+
         import json
         op_args = json.loads(op_args)
         op_kwargs = json.loads(op_kwargs)
@@ -87,11 +91,6 @@ def _create_component_spec_from_airflow_op(
         from datetime import datetime
         from airflow import DAG, settings
         from airflow.models import TaskInstance, Variable, XCom
-        import logging
-
-        # Allow logs to show in Pipelines UI
-        root = logging.getLogger()
-        root.setLevel(logging.DEBUG)
 
         execution_date = datetime.now()
 
