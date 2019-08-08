@@ -79,8 +79,8 @@ def _create_component_spec_from_airflow_op(
         root = logging.getLogger()
         root.setLevel(logging.DEBUG)
 
-        logging.info('Args: %s' % args)
-        logging.info('Kwargs: %s' % kwargs)
+        logging.info('Args: %s' % op_args)
+        logging.info('Kwargs: %s' % op_kwargs)
 
         import json
         op_args = json.loads(op_args)
