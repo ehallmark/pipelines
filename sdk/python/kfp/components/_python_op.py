@@ -87,12 +87,12 @@ except ImportError:
 ''' + '''
 pickler_python_version = {pickler_python_version}
 current_python_version = tuple(sys.version_info)
-if (
-    current_python_version[0] != pickler_python_version[0] or
-    current_python_version[1] < pickler_python_version[1] or
-    current_python_version[0] == 3 and ((pickler_python_version[1] < 6) != (current_python_version[1] < 6))
-    ):
-    raise RuntimeError("Incompatible python versions: " + str(current_python_version) + " instead of " + str(pickler_python_version))
+#if (
+#    current_python_version[0] != pickler_python_version[0] or
+#    current_python_version[1] < pickler_python_version[1] or
+#    current_python_version[0] == 3 and ((pickler_python_version[1] < 6) != (current_python_version[1] < 6))
+#    ):
+#    raise RuntimeError("Incompatible python versions: " + str(current_python_version) + " instead of " + str(pickler_python_version))
 
 if current_python_version != pickler_python_version:
     print("Warning!: Different python versions. The code may crash! Current environment python version: " + str(current_python_version) + ". Component code python version: " + str(pickler_python_version), file=sys.stderr)
