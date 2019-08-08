@@ -85,6 +85,9 @@ def _create_component_spec_from_airflow_op(
         import json
         op_args = json.loads(op_args)
         op_kwargs = json.loads(op_kwargs)
+        if 'time_delta' in op_kwargs:
+            from datetime import timedelta
+            op_kwargs['time_delta'] = timedelta(**op_kwargs['time_delta'])
         from airflow.utils import db
         db.initdb()
 
