@@ -99,7 +99,7 @@ if current_python_version != pickler_python_version:
     print("Warning!: Different python versions. The code may crash! Current environment python version: " + str(current_python_version) + ". Component code python version: " + str(pickler_python_version), file=sys.stderr)
 
 import base64
-import pickle
+import cPickle as pickle
 
 {func_name} = pickle.loads(base64.b64decode({func_pickle}))
 '''.format(
