@@ -66,8 +66,6 @@ def _capture_function_code_using_cloudpickle(func, modules_to_capture: List[str]
         sys.modules.update(old_modules)
 
     function_loading_code = '''\
-from __future__ import print_function
-from future.utils import raise_
 import sys
 try:
     import cloudpickle as _cloudpickle
@@ -283,6 +281,7 @@ def _func_to_component_spec(func, extra_code='', base_image=_default_base_image,
 
     full_source = \
 '''\
+from __future__ import print_function
 _output_files = []
 {extra_code}
 
