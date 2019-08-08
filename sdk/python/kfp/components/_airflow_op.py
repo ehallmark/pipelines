@@ -34,7 +34,7 @@ def create_component_from_airflow_op(op_class, base_image=_default_airflow_base_
     def _build(*op_args, base_image=base_image, result_output_name=result_output_name, variables_dict_output_name=variables_dict_output_name, xcoms_dict_output_name=xcoms_dict_output_name, modules_to_capture=modules_to_capture, use_code_pickling=use_code_pickling, task_id=None, **op_kwargs):
         op = _create_component_from_airflow_op(op_class, *op_args, base_image=base_image, task_id=task_id, result_output_name=result_output_name, variables_dict_output_name=variables_dict_output_name, xcoms_dict_output_name=xcoms_dict_output_name, modules_to_capture=modules_to_capture, use_code_pickling=use_code_pickling, **op_kwargs)
         import json
-        return op(json.dumps(op_args), json.dumps(op_kwargs))
+        return op(op_class, json.dumps(op_args), json.dumps(op_kwargs))
 
     return _build
 
@@ -73,7 +73,7 @@ def _create_component_spec_from_airflow_op(
     from collections import namedtuple
     returnType = namedtuple('AirflowOpOutputs', output_names)
 
-    def _run_airflow_op_closure(op_args, op_kwargs):
+    def _run_airflow_op_closure(op_class, op_args, op_kwargs):
         import logging
         # Allow logs to show in Pipelines UI
         root = logging.getLogger()
