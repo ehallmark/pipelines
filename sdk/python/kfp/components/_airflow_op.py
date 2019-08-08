@@ -74,6 +74,10 @@ def _create_component_spec_from_airflow_op(
     returnType = namedtuple('AirflowOpOutputs', output_names)
 
     def _run_airflow_op_closure(op_args, op_kwargs):
+
+        logging.info('Args: %s' % args)
+        logging.info('Kwargs: %s' % kwargs)
+        
         import json
         op_args = json.loads(op_args)
         op_kwargs = json.loads(op_kwargs)
@@ -97,7 +101,9 @@ def _create_component_spec_from_airflow_op(
 
         dag = DAG(dag_id='anydag', start_date=execution_date)
 
-        task = Op(*op_args, **op_kwargs, dag=dag, task_id='anytask')
+        op_kwargs['task_id'] = 'anytask'
+        op_kwargs['dag'] = dag
+        task = Op(*op_args, **op_kwargs)
         ti = TaskInstance(task=task, execution_date=execution_date)
         result = task.execute(ti.get_template_context())
 
