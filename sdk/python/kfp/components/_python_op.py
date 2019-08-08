@@ -61,7 +61,8 @@ def _capture_function_code_using_cloudpickle(func, modules_to_capture: List[str]
         for module_name in modules_to_capture:
             if module_name in sys.modules:
                 old_modules[module_name] = sys.modules.pop(module_name)
-        func_pickle = base64.b64encode(cloudpickle.dumps(func, pickle.DEFAULT_PROTOCOL))
+        #func_pickle = base64.b64encode(cloudpickle.dumps(func, pickle.DEFAULT_PROTOCOL))
+        func_pickle = base64.b64encode(pickle.dumps(func, 2))
     finally:
         sys.modules.update(old_modules)
 
