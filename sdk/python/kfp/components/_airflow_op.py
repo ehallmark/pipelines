@@ -33,7 +33,8 @@ def create_component_from_airflow_op(op_class, base_image=_default_airflow_base_
 
     def _build(*op_args, base_image=base_image, result_output_name=result_output_name, variables_dict_output_name=variables_dict_output_name, xcoms_dict_output_name=xcoms_dict_output_name, modules_to_capture=modules_to_capture, use_code_pickling=use_code_pickling, task_id=None, **op_kwargs):
         op = _create_component_from_airflow_op(op_class, *op_args, base_image=base_image, task_id=task_id, result_output_name=result_output_name, variables_dict_output_name=variables_dict_output_name, xcoms_dict_output_name=xcoms_dict_output_name, modules_to_capture=modules_to_capture, use_code_pickling=use_code_pickling, **op_kwargs)
-        return op()
+        import json
+        return op(json.dumps(op_args), json.dumps(op_kwargs))
 
     return _build
 
@@ -72,7 +73,10 @@ def _create_component_spec_from_airflow_op(
     from collections import namedtuple
     returnType = namedtuple('AirflowOpOutputs', output_names)
 
-    def _run_airflow_op_closure() -> returnType:
+    def _run_airflow_op_closure(op_args, op_kwargs):
+        import json
+        op_args = json.loads(op_args)
+        op_kwargs = json.loads(op_kwargs)
         from airflow.utils import db
         db.initdb()
 
@@ -97,25 +101,25 @@ def _create_component_spec_from_airflow_op(
         ti = TaskInstance(task=task, execution_date=execution_date)
         result = task.execute(ti.get_template_context())
 
-        variables = {var.id: var.val for var in settings.Session().query(Variable).all()}
-        xcoms = {msg.key: msg.value for msg in settings.Session().query(XCom).all()}
-        output_values = {}
+        #variables = {var.id: var.val for var in settings.Session().query(Variable).all()}
+        #xcoms = {msg.key: msg.value for msg in settings.Session().query(XCom).all()}
+        #output_values = {}
 
-        import json
-        if result_output_name is not None:
-            output_values[result_output_name] = str(result)
-        if variables_dict_output_name is not None:
-            output_values[variables_dict_output_name] = json.dumps(variables)
-        if xcoms_dict_output_name is not None:
-            output_values[xcoms_dict_output_name] = json.dumps(xcoms)
-        for name in variables_output_names:
-            output_values[name] = variables[name]
-        for name in xcoms_output_names:
-            output_values[name] = xcoms[name]
+        #import json
+        #if result_output_name is not None:
+        #    output_values[result_output_name] = str(result)
+        #if variables_dict_output_name is not None:
+        #    output_values[variables_dict_output_name] = json.dumps(variables)
+        #if xcoms_dict_output_name is not None:
+        #    output_values[xcoms_dict_output_name] = json.dumps(xcoms)
+        #for name in variables_output_names:
+        #    output_values[name] = variables[name]
+        #for name in xcoms_output_names:
+        #    output_values[name] = xcoms[name]
 
-        logging.info('Output: %s' % output_values)
+        #logging.info('Output: %s' % output_values)
 
-        return returnType(**output_values)
+        return result #'Complete' #returnType(**output_values)
 
     # Hacking the function signature so that correct component interface is generated
     import inspect
