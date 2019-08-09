@@ -91,7 +91,7 @@ def _create_component_spec_from_airflow_op(
             del op_kwargs['_delta']
         if 'on_failure_callback' in op_kwargs:
             print('Warning failure callback not yet working on kubeflow!')
-            
+
         from airflow.utils import db
         db.initdb()
 
@@ -131,7 +131,7 @@ def _create_component_spec_from_airflow_op(
 
         #logging.info('Output: %s' % output_values)
 
-        return result #'Complete' #returnType(**output_values)
+        return str(result) #'Complete' #returnType(**output_values)
 
     # Hacking the function signature so that correct component interface is generated
     import inspect
@@ -140,7 +140,7 @@ def _create_component_spec_from_airflow_op(
     #parameters = [param for param in parameters if param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD]
     sig = inspect.Signature(
         parameters=inspect.signature(_run_airflow_op_closure).parameters.values(),
-        return_annotation=returnType,
+        return_annotation=str,
     )
     _run_airflow_op_closure.__signature__ = sig
     #_run_airflow_op_closure.__name__ = op_class.__name__
