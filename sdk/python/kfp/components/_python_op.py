@@ -292,6 +292,7 @@ _output_files = []
 
 _outputs = {func_name}(**_parsed_args)
 
+print('Code ran successfully. Saving any outputs now...')
 if not hasattr(_outputs, '__getitem__') or isinstance(_outputs, str):
     _outputs = [_outputs]
 import os
@@ -301,8 +302,9 @@ for idx, filename in enumerate(_output_files):
     _parent_path = _output_path.parent
     if not os.path.exists(str(_parent_path)):
         os.makedirs(str(_parent_path))
-    with open(str(_output_path), 'w') as f:
-        f.write(str(_outputs[idx]))
+    if idx < len(_outputs):
+        with open(str(_output_path), 'w') as f:
+            f.write(str(_outputs[idx]))
 '''.format(
         func_name=func.__name__,
         func_code=func_code,
